@@ -20,21 +20,30 @@ app.use(compression());
 const staticPath = path.resolve(__dirname, '../client/build');
 app.use(express.static(staticPath));
 app.use(helmet());
-app.post('/api/users/signup', (req, res) => {
+app.post('/api/users/signup', requiredFields, (req, res) => {
     res.json({
         message: 'You signed up!'
     })
 })
 
-app.post('/api/users/login', (req, res) => {
+app.post('/api/users/login', requiredFields, (req, res) => {
     res.json({
         message: 'You logged in!'
     })
 })
 
+
+
 app.listen(5000, () => console.log('Server started on port 5000'));
 
-
+// Custom middleware:
+function requiredFields(req, res, next) {
+    if(!req.body.email || !req.body.password) {
+        return res.sendStatus(400)
+    } else {
+        next()
+    }
+}
 
 
 
