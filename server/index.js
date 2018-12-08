@@ -10,6 +10,11 @@ app.post('/api/users/signup', (req, res) => {
     })
 })
 
+app.post('/api/users/login', (req, res) => {
+    res.json({
+        message: 'You logged in!'
+    })
+})
 
 app.listen(5000, () => console.log('Server started on port 5000'));
 

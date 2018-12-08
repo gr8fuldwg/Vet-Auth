@@ -4,8 +4,16 @@
   "description": "RESTful API using MERN/ Authentication",
   "main": "index.js",
   "scripts": {
+    "start": "node server/",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/"
+    "dev": "run-p dev:*",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "lint": "eslint --fix --ignore-path .gitignore .",
+    "postinstall": "run-p install:*",
+    "install:server": "cd server && npm install",
+    "install:client": "cd client && npm install",
+    "heroku-postbuild": "cd client && npm run build"
   },
   "repository": {
     "type": "git",
