@@ -1,6 +1,19 @@
 const express = require('express');
 const path = require('path');
 const app = express();
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+
+//set up environment variable
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+//grab the mongo uri from the environment
+const { MONGO_URI } = process.env;
+
+//connect to the database
+mongoose.connect(MONGO_URI, { useNewUrlParser: true });    
+
+const port = process.env.PORT || 8080;
 
 //middleware: import
 const bodyParser = require('body-parser');
