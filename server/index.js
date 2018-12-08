@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-
 const app = express();
 
 //middleware: import
@@ -8,7 +7,6 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const logger = require('morgan');
 const compression = require('compression');
-
 
 
 //middleware: use
@@ -25,20 +23,24 @@ app.post('/api/users/signup', requiredFields, (req, res) => {
         message: 'You signed up!'
     })
 })
-
 app.post('/api/users/login', requiredFields, (req, res) => {
     res.json({
         message: 'You logged in!'
     })
 })
 
-
+if (process.env.NODE_ENV === 'production') {
+    app.use('*', (req, res) => {
+        const index = path.join(staticPath, 'index.html');
+        res.sendFile(index);
+    });
+}
 
 app.listen(5000, () => console.log('Server started on port 5000'));
 
-// Custom middleware:
+// Custom middleware
 function requiredFields(req, res, next) {
-    if(!req.body.email || !req.body.password) {
+    if (!req.body.email || !req.body.password) {
         return res.sendStatus(400)
     } else {
         next()
