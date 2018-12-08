@@ -1,5 +1,5 @@
 const express = require('express');
-
+const path = require('path');
 
 const app = express();
 
@@ -12,14 +12,14 @@ const compression = require('compression');
 
 
 //middleware: use
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
-server.use(logger('dev'));
-server.use(compression());
-server.use(helmet());
-const staticPath = path.resolve(__dirname, '../client/build');
-server.use(express.static(staticPath));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(logger('dev'));
+app.use(compression());
 
+const staticPath = path.resolve(__dirname, '../client/build');
+app.use(express.static(staticPath));
+app.use(helmet());
 app.post('/api/users/signup', (req, res) => {
     res.json({
         message: 'You signed up!'
