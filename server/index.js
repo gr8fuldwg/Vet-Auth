@@ -3,6 +3,7 @@ const path = require('path');
 const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const User = require('./models/user');
 
 //set up environment variable
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -11,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const { MONGO_URI } = process.env;
 
 //connect to the database
-mongoose.connect(MONGO_URI, { useNewUrlParser: true });    
+mongoose.connect(MONGO_URI, { useNewUrlParser: true });
 
 const port = process.env.PORT || 8080;
 
@@ -31,11 +32,17 @@ app.use(compression());
 const staticPath = path.resolve(__dirname, '../client/build');
 app.use(express.static(staticPath));
 app.use(helmet());
-app.post('/api/users/signup', requiredFields, (req, res) => {
-    res.json({
-        message: 'You signed up!'
-    })
-})
+app.post('/api/users/signup', requiredFields, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = new User({ email, password });
+        await user.save();
+        res.status(201).json({ message: 'successful' });
+    } catch (e) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 app.post('/api/users/login', requiredFields, (req, res) => {
     res.json({
         message: 'You logged in!'
