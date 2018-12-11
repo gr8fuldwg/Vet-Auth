@@ -44,10 +44,9 @@ app.post('/api/users/signup', requiredFields, async (req, res) => {
 });
 
 app.post('/api/users/login', requiredFields, (req, res) => {
-    res.json({
-        message: 'You logged in!'
-    })
-})
+    User.findOne({ email: req.body.email })
+    res.status(201).json({ message: 'what is your email'});
+});
 
 if (process.env.NODE_ENV === 'production') {
     app.use('*', (req, res) => {
