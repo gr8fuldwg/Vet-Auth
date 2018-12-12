@@ -3,6 +3,8 @@ const path = require('path');
 const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+
 const User = require('./models/user');
 
 //set up environment variable
@@ -14,7 +16,10 @@ const { MONGO_URI } = process.env;
 //connect to the database
 mongoose.connect(MONGO_URI, { useNewUrlParser: true });
 
-const port = process.env.PORT || 8080;
+//get the jwt secret
+const { SECRET } = process.env;
+
+const port = process.env.PORT || 5000;
 
 //middleware: import
 const bodyParser = require('body-parser');
@@ -35,7 +40,8 @@ app.use(helmet());
 app.post('/api/users/signup', requiredFields, async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = new User({ email, password });
+        const user = new User({ email });
+        user.hashPassword(password);
         await user.save();
         res.status(201).json({ message: 'successful' });
     } catch (e) {
@@ -43,9 +49,14 @@ app.post('/api/users/signup', requiredFields, async (req, res) => {
     }
 });
 
-app.post('/api/users/login', requiredFields, (req, res) => {
-    User.findOne({ email: req.body.email })
-    res.status(201).json({ message: 'what is your email'});
+app.post('/api/users/login', requiredFields, async (req, res) => {
+    const user = await User.findOne({ email: req.body.email })
+    if(!user.isValidPassword(req.body.password)){
+        return res.sendStatus(401);
+    }
+    const token = jwt.sign({ user }, SECRET, { expiresIn: '30min' })
+    res.status(201).json({ token });
+    
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -55,7 +66,12 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-app.listen(5000, () => console.log('Server started on port 5000'));
+
+app.get('/api/users/welcome', isAuthorized, (req, res) => {
+    res.send('You are authorized');
+});
+
+app.listen(port, () => console.log('Server started on port 5000'));
 
 // Custom middleware
 function requiredFields(req, res, next) {
@@ -64,6 +80,20 @@ function requiredFields(req, res, next) {
     } else {
         next()
     }
+}
+function isAuthorized(req, res, next){
+    const token = req.headers['token']
+    if(!token) {
+        return res.sendStatus(401);
+    }
+    try {
+        const { payload } = jwt.verify(token, SECRET);
+        console.log(payload);
+        next();
+    } catch (error) {
+        res.sendStatus(401);
+    }
+
 }
 
 
